@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Factorize as many numbers as possible into a product of two smaller numbers
+
+factorize()
+{
+	if [ $# -ne 3 ];
+	then
+		inargs=("$@")
+		argscount=0
+		prod=1
+		for arg in ${inargs[*]};
+		do
+			if [ $argscount -gt 1 ];
+			then
+				prod=$(echo $arg*$prod | bc)
+			fi
+			argscount=$((argscount + 1))
+		done
+	else
+		prod=$3
+	fi
+	fstnum=$2
+	dig=$(echo "$1" | tr ':' '=')
+
+	res=$(echo "if($prod > $fstnum) 1 else 0" | bc)
+		if ((res == 1)); then
+			temp=$fstnum
+			fstnum=$prod
+			prod=$temp
+		fi
+	echo "$dig$fstnum*$prod"
+}
+
+if [ $# -ne 1 ]
+then
+	echo 'Usage: factors <file>'
+	exit 1
+else
+	while read i
+	do
+		res=$(factor "$i")
+		factorize $res
+	done < "$1"
+fi
